@@ -1,41 +1,26 @@
-{
-  "format_version": 2,
-  "header": {
-    "name": "Vibrant RTX Shader Pack",
-    "description": "A vibrant RTX resource pack with colorful sky and stylized blocks.",
-    "uuid": "123e4567-e89b-12d3-a456-426614174000",
-    "version": [1, 0, 0],
-    "min_engine_version": [1, 16, 100]
-  },
-  "modules": [
-    {
-      "type": "resources",
-      "uuid": "123e4567-e89b-12d3-a456-426614174001",
-      "version": [1, 0, 0]
-    }
-  ]
+// popup-prank.js
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
+
+// File to track if the popup has already been shown
+const flagFile = path.join(__dirname, '.popup_shown_flag');
+
+if (fs.existsSync(flagFile)) {
+  // Popup already shown; exit
+  return;
 }
-let system = server.registerSystem(0, 0);
 
-system.initialize = function() {
-    this.listenForEvent("minecraft:script_logger_config", (eventData) => this.onScriptLoggerConfig(eventData));
-    this.broadcastMessage("World Shader Pack loaded!");
-};
+// Create the flag so it only shows once
+fs.writeFileSync(flagFile, 'Popup has been shown');
 
-system.onScriptLoggerConfig = function(eventData) {
-    // Example: Modifying the world light intensity
-    let world = this.getWorld();
-    let worldSettings = world.getWorldSettings();
+// Show the popup using a native alert depending on platform
+if (process.platform === 'win32') {
+  exec('mshta "javascript:alert(\'You smell funny\');close()"');
+} else if (process.platform === 'darwin') {
+  exec(`osascript -e 'display alert "You smell funny"'`);
+} else if (process.platform === 'linux') {
+  exec(`zenity --info --text="You smell funny"`);
+}
 
-    // Set the world lighting intensity (example values, adjust as needed)
-    worldSettings.setWorldLightIntensity(1.2);
-    
-    // Adjust the time of day to affect lighting (morning, noon, sunset)
-    worldSettings.setTime(12000); // Noon (adjust as needed)
 
-    // You can also manipulate fog, weather, etc.
-    worldSettings.setWeather("clear");  // Set clear weather
-    
-    // Modify fog properties
-    worldSettings.setFogDensity(0.5);  // Set fog density (can be used to create an atmosphere)
-};
